@@ -138,14 +138,26 @@ def totalConexiones(analyzer):
     return cont 
 
 def cargarClusteres(analyzer):
+    """
+    Carga el el analyzer los componentes conectados.
+    """
     model.connectedComponents(analyzer)
 
 def getCantidadClusteres(catalog):
     """
-    Retorna el numero de clusteres que hay en el grafo.
+    Retorna la cantidad de componentes conectados.
     """
-    clust = model.numConnectedComponents(catalog)
-    return clust
+    rta = model.getCantidadClusteres(catalog)
+    return rta
+
+
+def redExpansion(catalog):
+    """
+    Retorna el numero de nodos conectados a la red de expansion minima,
+    el total del costo de la red y la rama mas larga de la red.
+    """
+    red = model.redExpansion(catalog)
+    return red
 
 def pertenecenCluster(catalog,lp1,lp2):
     """
@@ -169,18 +181,11 @@ def getRutaMenorDist(analyzer, paisA, paisB):
     ruta = model.getRutaMenorDist(analyzer, paisA, paisB)
     return ruta
 
-def getInfraest(cont):
-    inf = model.getInfraest(cont)
-    return inf
-
-def getFallas(cont, lp):
-    fallas = model.getFallas(cont, lp)
-    return fallas
-
-def getMejoresCanales(cont, pais, cable):
-    canales = model.getMejoresCanales(cont, pais, cable)
-    return canales
-
-def getMejorRuta(cont, ip1, ip2):
-    ruta = model.getMejorRuta(cont, ip1, ip2)
-    return ruta
+def getFallas(analyzer,lp):
+    """
+    Retorna el numero de paises afectados, y una lista de paises afectados
+    ordenada descendentemente con la distancia al lp dado en parametro.
+    """
+    rta = model.getFallas(analyzer,lp)
+    return rta
+  

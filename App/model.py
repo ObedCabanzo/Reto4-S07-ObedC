@@ -30,9 +30,11 @@ from math import inf
 import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
+from DISClib.ADT import orderedmap as omp
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Graphs import scc
 from DISClib.Algorithms.Graphs import dijsktra as dj
+from DISClib.Algorithms.Graphs import prim
 from DISClib.ADT.graph import gr
 from DISClib.Utils import error as error
 assert cf
@@ -61,13 +63,13 @@ def newAnalyzer():
                    }
 
         analyzer['connections'] = gr.newGraph(datastructure='ADJ_LIST',
-                                              directed=True,
+                                              directed=False,
                                               size=10,
                                               comparefunction=compareIds) 
-        analyzer['countrys'] = mp.newMap(numelements=14000,
+        analyzer['countrys'] = mp.newMap(numelements=100,
                                      maptype='PROBING', loadfactor=0.5,
                                      comparefunction=compareIds)
-        analyzer['landing_points'] = mp.newMap(numelements=14000,
+        analyzer['landing_points'] = mp.newMap(numelements=100,
                                      maptype='PROBING', loadfactor=0.5,
                                      comparefunction=compareIds)
         analyzer['landing_points_name'] = mp.newMap(numelements=100,
@@ -110,7 +112,6 @@ def newConnection(analyzer, connection):
             addVertice(analyzer,forigen)
             addVertice(analyzer,fdestino)
             addConnection(analyzer,forigen,fdestino,distancia)
-            addConnection(analyzer,fdestino,forigen,distancia)
             addMapLP(analyzer,origen,forigen,connection)
             addMapLP(analyzer,destino,fdestino,connection)
 
@@ -126,7 +127,6 @@ def newConnection(analyzer, connection):
 
             if not estanUnidos:
                 addConnection(analyzer,forigen,fdestino,distancia)
-                addConnection(analyzer,fdestino,forigen,distancia)
         
             
 
@@ -184,7 +184,6 @@ def addMapLP(analyzer, origen,forigen,connection):
         else: 
             ultimo = lt.lastElement(lista)
             addConnection(analyzer,ultimo,forigen, 0.1 )
-            addConnection(analyzer,forigen,ultimo, 0.1 )
             lt.addLast(lista, forigen)
 
             if banda < valor['menorAncho']:
@@ -218,6 +217,10 @@ def crearLandingCapital(analyzer):
  
            capital = valor['capital']
            lpsPais = valor['lista'] 
+
+           lpCapital = newLandingPoint(capital,None,a)
+           mp.put(landingPoints,capital,lpCapital)
+
            tamLista = lt.size(lpsPais)
            con2 = 0
 
@@ -236,11 +239,10 @@ def crearLandingCapital(analyzer):
                while con3 < tam3:
                     i = lt.getElement(listaLps,con3) 
                     addConnection(analyzer,capital,i, menorDistancia)
-                    addConnection(analyzer,i,capital, menorDistancia)
                     con3 += 1
                con2 += 1
         con += 1
-        print(con) 
+ 
     except StopIteration:
         print("Finalizó.")
         
@@ -258,6 +260,9 @@ def crearLandingPoints(analyzer, landing_point):
     name  = landing_point['name']
 
     corte = name.split(",")
+    tamaño = len(corte)
+
+    paisLp = corte[tamaño-1].strip()
 
     modif = corte[0].lower()
     modif1 = modif.strip()
@@ -265,7 +270,7 @@ def crearLandingPoints(analyzer, landing_point):
     pais = corte[len(corte)-1]
     paisM = pais.strip()
 
-    elemento  = newLandingPoint(id,landing_point)
+    elemento  = newLandingPoint(id,landing_point,paisLp)
     elementoName  = newLandingPointName(modif1,id,paisM)
 
     mp.put(mapaNames,modif1,elementoName)
@@ -322,13 +327,13 @@ def newCountry(name,elemento,capital):
     country['lista'] = lt.newList('ARRAY_LIST')
     return country
 
-def newLandingPoint(id,lp):
+def newLandingPoint(id,lp,pais):
 
     """
     Define la estructura de un landing point con id como key
     """
 
-    lp = {'landing_point': id,'landing_pt': lp,'menorAncho': None, 'cable': None,
+    lp = {'landing_point': id,'landing_pt': lp, 'pais': pais,'menorAncho': None, 'cable': None,
     'distancia': None, 'lista': None}
     lp['lista'] = lt.newList('ARRAY_LIST')
     return lp 
@@ -496,8 +501,109 @@ def getRutaMenorDist(analyzer, paisA, paisB):
         
     return lista, distanciaTotal
        
+def redExpansion(analyzer):
+    """
+    REQ. 4
+    Retorna el numero de nodos conectados a la red de expansion minima,
+    el total del costo de la red y la rama mas larga de la red.
+    """
+    grafo = analyzer['connections']
+    estruc = prim.PrimMST(grafo)
+    pesoTotal = prim.weightMST(grafo,estruc)
+    vertices = estruc['marked']
+    numVertices = mp.size(vertices)
+    distancias = estruc['distTo']
+    keys = mp.keySet(distancias)
+    iterador = lt.iterator(keys)
+
+    con = 0
+    tam = lt.size(keys)
+
+    distanciaMayor = 0
+    ramaMayor = None
+    try:
+        while con < tam:
+            a = next(iterador)
+            elemento = mp.get(distancias,a)
+            valor = me.getValue(elemento)
+            if(valor > distanciaMayor):
+                distanciaMayor = valor
+                ramaMayor = a
+    except StopIteration:
+        print("Finalizó.")
+
+    return pesoTotal,numVertices,distanciaMayor,ramaMayor
+
+def getFallas(analyzer,lapo):
+    """
+    REQ 5.
+    Retorna el numero de paises afectados, y una lista de paises afectados
+    ordenada descendentemente con la distancia al lp dado en parametro.
+    """
+
+    sf = lapo.lower()
+    lp = sf.strip()
+
+    lps = analyzer['landing_points']
+    lpsName = analyzer['landing_points_name']
+    grafo = analyzer['connections']
+    elemento = mp.get(lpsName,lp)
+
+    paises = lt.newList('ARRAY_LIST')
+    
+
+    if elemento == None:
+        print("El landing point no existe.")
+    else:
+        valor = me.getValue(elemento)
+        id = valor['id']
+
+        entry = mp.get(lps,id)
+        val = me.getValue(entry)
+        lis = val['lista']
+        lista = lis['elements']
+        for n in lista:
+            adya = gr.adjacents(grafo,n)
+            
+            iterador  = lt.iterator(adya)
+            con = 0
+            tam = lt.size(adya)
+            try: 
+                while con < tam: 
+                    a = next(iterador)
+                    lp = extraerLp(a)
+                    entry = mp.get(lps,lp)
+                    valor = me.getValue(entry)
+                    pais = valor['pais']
+
+                    if(not lt.isPresent(paises,pais)):
+                        lt.addLast(paises, pais)
+                    con += 1
+
+            except StopIteration:
+                print("Finalizó.")
+    numPaises = lt.size(paises)
+
+    return numPaises, paises
 
 
+
+
+
+def medirDistanciaMinima(grafo, vertice1, vertice2):
+    """
+    Mide el costo que existe entre el vertice 1 y el vertice 2.
+    """
+    estruc = dj.Dijkstra(grafo,vertice1)
+    distanciaTotal = dj.distTo(estruc,vertice2)
+    return distanciaTotal
+    
+def getCantidadClusteres(analyzer):
+    """
+    Retorna la cantidad de componentes conectados.
+    """
+    rta = analyzer['componentes']
+    return rta
 
 def estanConectados(grafo,forigen,fdestino):
 
@@ -532,6 +638,14 @@ def formatVertex(lpoint,cable):
     name = lpoint + '-' + cable
     return name 
 
+def extraerLp(vertice):
+    """
+    Extrae el landing point del vertice dado por parametro.
+    """
+    corte = vertice.split("-")
+    lp = corte[0]
+    return lp
+
 def numeroPaises(analyzer):
 
     """
@@ -556,19 +670,6 @@ def totalConexiones(analyzer):
     cont = gr.numEdges(analyzer['connections'])
     return cont 
 
-def getInfraest(cont):
-    """
-    """
-    pass
-
-def getFallas(cont, lp):
-    pass
-
-def getMejoresCanales(cont, pais, cable):
-    pass
-
-def getMejorRuta(cont, ip1, ip2):
-    pass
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 

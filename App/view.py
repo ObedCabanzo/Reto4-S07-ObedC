@@ -20,6 +20,8 @@
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
 
+
+
 import config as cf
 import sys
 import controller
@@ -103,7 +105,7 @@ while True:
         numCountries = controller.totalLandingPoints(catalog)
         numLanding = controller.numeroPoints(catalog)
         numConexiones = controller.totalConexiones(catalog)
-        #controller.cargarClusteres(catalog)
+        controller.cargarClusteres(catalog)
 
 
         print('Total de landing points: ' + str(numLanding))
@@ -120,13 +122,13 @@ while True:
         
         lp1 = input("Nombre del landing point 1: ")
         lp2 = input("Nombre del landing point 2: ")
-        """
+        
         delta_time = -1.0
         delta_memory = -1.0
         tracemalloc.start()
         start_time = getTime()
         start_memory = getMemory()
-        """
+        
 
         respuesta = controller.getCantidadClusteres(catalog) 
         print('La cantidad de clusteres es: ' + str(respuesta))
@@ -140,7 +142,7 @@ while True:
             print('Los dos Landing Points NO pertencen al mismo cluster.')
     
 
-        """
+        
         stop_memory = getMemory()
         stop_time = getTime()
         tracemalloc.stop()
@@ -149,23 +151,21 @@ while True:
         print("\nTiempo [ms]: " + str(delta_time) + "  ||  " + 
               "Memoria [kB]: " + str(delta_memory) + "\n")
 
-        print("\n++++++ Req. No. 1 results ... ++++++")
-        print("El número total de clústeres presentes en la red es: " + str(respuesta[0]))
-        """
+       
+        
         
 
     elif int(inputs[0]) == 3:
-        """
+       
         delta_time = -1.0
         delta_memory = -1.0
         tracemalloc.start()
         start_time = getTime()
         start_memory = getMemory()
-        """
+        
 
         respuesta = controller.conexionesLps(catalog)
-        
-        """
+       
         stop_memory = getMemory()
         stop_time = getTime()
         tracemalloc.stop()
@@ -174,22 +174,19 @@ while True:
         print("\nTiempo [ms]: " + str(delta_time) + "  ||  " + 
               "Memoria [kB]: " + str(delta_memory) + "\n")
         
-        print("\n++++++ Req. No. 2 results ... ++++++")
-        print("Landing points:")
-        print("Total de cables conectados a dichos landpoints: ")
-        """
+       
 
     elif int(inputs[0]) == 4:
         paisA = input("País origen: ")
         paisB = input("País destino: ")
         
-        """
+   
         delta_time = -1.0
         delta_memory = -1.0
         tracemalloc.start()
         start_time = getTime()
         start_memory = getMemory()
-        """
+      
 
         rta = controller.getRutaMenorDist(catalog, paisA, paisB)
         lis = rta[0]
@@ -207,7 +204,7 @@ while True:
         print("******************************************")
         print("La disancia total es: " + str(distanciaTotal) + " Km.")
 
-        """
+        
         stop_memory = getMemory()
         stop_time = getTime()
         tracemalloc.stop()
@@ -216,18 +213,28 @@ while True:
         print("\nTiempo [ms]: " + str(delta_time) + "  ||  " + 
               "Memoria [kB]: " + str(delta_memory) + "\n")
 
-        print("\n++++++ Req. No. 3 results ... ++++++")
-        """
+       
 
     elif int(inputs[0]) == 5:
+      
         delta_time = -1.0
         delta_memory = -1.0
         tracemalloc.start()
         start_time = getTime()
         start_memory = getMemory()
+      
 
-        respuesta = controller.getInfraest(cont)
+        rta = controller.redExpansion(catalog)
 
+        pesoTotal = rta[0]
+        numVertices = rta[1]
+        distanciaMayor = rta[2]
+        ramaMayor =  rta[3]
+
+        print("El número de nodos conectados a la red de expansión mínima es: "+ str(numVertices))
+        print("El costo total de la red de expansión mínima es: " + str(pesoTotal) + " Km.")
+        print("La rama mas larga es: " + ramaMayor + " con " + str(distanciaMayor)+ " Km.")
+     
         stop_memory = getMemory()
         stop_time = getTime()
         tracemalloc.stop()
@@ -235,19 +242,28 @@ while True:
         delta_memory = deltaMemory(start_memory, stop_memory)
         print("\nTiempo [ms]: " + str(delta_time) + "  ||  " + 
               "Memoria [kB]: " + str(delta_memory) + "\n")
+      
        
-        print("\n++++++ Req. No. 4 results ... ++++++")
+        
 
     elif int(inputs[0]) == 6:
         lp = input("Nombre del landing point: ")
-
+        """
         delta_time = -1.0
         delta_memory = -1.0
         tracemalloc.start()
         start_time = getTime()
         start_memory = getMemory()
+        """
         
-        respuesta = controller.getFallas(cont, lp)
+        rta = controller.getFallas(catalog, lp)
+        numeroPaises = rta[0] 
+        paises = rta[1]
+
+        lista = paises['elements']
+        print("El numero de paises afectados es: " + str(numeroPaises))
+        for n in lista:
+            print(n)
 
         stop_memory = getMemory()
         stop_time = getTime()
@@ -258,6 +274,7 @@ while True:
               "Memoria [kB]: " + str(delta_memory) + "\n")
 
         print("\n++++++ Req. No. 5 results ... ++++++")
+     
 
     elif int(inputs[0]) == 7:
         pais = input("Nombre del país: ")
