@@ -131,9 +131,10 @@ while True:
         
 
         respuesta = controller.getCantidadClusteres(catalog) 
-        print('La cantidad de clusteres es: ' + str(respuesta))
         
         rta2 = controller.pertenecenCluster(catalog,lp1,lp2)
+
+        print('La cantidad de clusteres es: ' + str(respuesta))
         print("*******************************************")
         print()
         if rta2:
@@ -202,7 +203,7 @@ while True:
             print()
         print()
         print("******************************************")
-        print("La disancia total es: " + str(distanciaTotal) + " Km.")
+        print("La distancia total es: " + str(distanciaTotal) + " Km.")
 
         
         stop_memory = getMemory()
@@ -248,13 +249,13 @@ while True:
 
     elif int(inputs[0]) == 6:
         lp = input("Nombre del landing point: ")
-        """
+        
         delta_time = -1.0
         delta_memory = -1.0
         tracemalloc.start()
         start_time = getTime()
         start_memory = getMemory()
-        """
+        
         
         rta = controller.getFallas(catalog, lp)
         numeroPaises = rta[0] 
@@ -273,7 +274,7 @@ while True:
         print("\nTiempo [ms]: " + str(delta_time) + "  ||  " + 
               "Memoria [kB]: " + str(delta_memory) + "\n")
 
-        print("\n++++++ Req. No. 5 results ... ++++++")
+        
      
 
     elif int(inputs[0]) == 7:

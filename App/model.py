@@ -602,7 +602,8 @@ def getCantidadClusteres(analyzer):
     """
     Retorna la cantidad de componentes conectados.
     """
-    rta = analyzer['componentes']
+    scco = analyzer['componentes']
+    rta = scc.connectedComponents(scco)
     return rta
 
 def estanConectados(grafo,forigen,fdestino):

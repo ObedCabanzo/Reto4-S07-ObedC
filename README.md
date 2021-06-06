@@ -2,6 +2,10 @@
 
 Este proyecto contiene los Tipos abstractos de datos, estructuras de datos y algoritmos requeridos por el curso ISIS1225-Estructuras de Datos y Algoritmos
 
+Jonathan Obed Cabanzo Certuche
+Codigo: 201911749
+Correo: jo.cabanzo@uniandes.edu.co
+
 -Lib
 Este directorio contiene todo el código de base que se entrega para el funcionamiento del curso.  Dentro de este directorio encuentran:
     
